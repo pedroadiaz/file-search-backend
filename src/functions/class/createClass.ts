@@ -9,7 +9,7 @@ import { PineConeService } from '@services/pinecone.service';
 export const handler = async(event: APIGatewayProxyEvent, context: Context) : Promise<APIGatewayProxyResult> => {
     const classObject = JSON.parse(event.body) as IClass;
     const client = new DocumentClient();
-    const tableName = `${process.env.CLASS_TABLE}+${process.env.AWS_STAGE}`;
+    const tableName = `${process.env.CLASS_TABLE}-${process.env.AWS_STAGE}`;
     const repo = new ClassRepo(client, tableName);
 
     const result = await createLambda(repo, classObject);

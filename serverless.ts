@@ -1,6 +1,8 @@
 import type { AWS } from '@serverless/typescript';
 import { classFunctions } from '@functions/class/functions.config';
 import { processFilesFunctions } from '@functions/processFiles/functions.config';
+import { stripeFunctions } from '@functions/stripe/functions.config';
+import { userFunctions } from '@functions/user/functions.config';
 
 const userTable = "users";
 const classTable = "class";
@@ -31,10 +33,10 @@ const serverlessConfiguration: AWS = {
           "dynamodb:DeleteItem"
         ],
         Resource: [
-          'arn:aws:dynamodb:us-west-1:*:table/' + classTable,
-          'arn:aws:dynamodb:us-west-1:*:table/' + classTable + '/index/*',
-          'arn:aws:dynamodb:us-west-1:*:table/' + userTable,
-          'arn:aws:dynamodb:us-west-1:*:table/' + userTable + '/index/*',
+          'arn:aws:dynamodb:us-west-1:*:table/' + classTable + '-${opt:stage}',
+          'arn:aws:dynamodb:us-west-1:*:table/' + classTable + '-${opt:stage}' + '/index/*',
+          'arn:aws:dynamodb:us-west-1:*:table/' + userTable + '-${opt:stage}',
+          'arn:aws:dynamodb:us-west-1:*:table/' + userTable + '-${opt:stage}' + '/index/*',
         ]
       }
     ],
@@ -42,7 +44,9 @@ const serverlessConfiguration: AWS = {
   // import the function via paths
   functions: { 
     ...classFunctions,
-    ...processFilesFunctions
+    ...processFilesFunctions,
+    ...stripeFunctions,
+    ...userFunctions,
    },
   package: { individually: true },
   resources: {
@@ -70,7 +74,7 @@ const serverlessConfiguration: AWS = {
           BillingMode: "PAY_PER_REQUEST",
           GlobalSecondaryIndexes: [
             {
-              IndexName:  `${userTable}-email-index`,
+              IndexName:  `${userTable + '-${opt:stage}'}-email-index`,
               KeySchema:[
                 {
                   AttributeName: "email",
@@ -107,7 +111,7 @@ const serverlessConfiguration: AWS = {
           BillingMode: "PAY_PER_REQUEST",
           GlobalSecondaryIndexes: [
             {
-              IndexName: `${classTable}-userId-index`,
+              IndexName: `${classTable + '-${opt:stage}'}-userId-index`,
               KeySchema:[
                 {
                   AttributeName: "userId",

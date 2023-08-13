@@ -7,7 +7,7 @@ import { ClassRepo } from '@repos/class.repo';
 export const handler = async(event: APIGatewayProxyEvent, context: Context) : Promise<APIGatewayProxyResult> => {
     const id = event.pathParameters.id;
     const client = new DocumentClient();
-    const tableName = `${process.env.CLASS_TABLE}+${process.env.AWS_STAGE}`;
+    const tableName = `${process.env.CLASS_TABLE}-${process.env.AWS_STAGE}`;
     const repo = new ClassRepo(client, tableName);
 
     return deleteByIdLambda(repo, id);
