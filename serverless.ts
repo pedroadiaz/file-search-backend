@@ -1,11 +1,18 @@
 import type { AWS } from '@serverless/typescript';
 import { classFunctions } from '@functions/class/functions.config';
-import { processFilesFunctions } from '@functions/processFiles/functions.config';
 import { stripeFunctions } from '@functions/stripe/functions.config';
 import { userFunctions } from '@functions/user/functions.config';
+import { bookFunctions } from '@functions/book/functions.config';
+import { promptFunctions } from '@functions/prompt/functions.config';
+import { searchResultsFunctions } from '@functions/searchResult/functions.config';
+import { sharedClassFunctions } from '@functions/shareClass/functions.config';
 
 const userTable = "users";
 const classTable = "class";
+const bookTable = "books";
+const promptTable = "prompts";
+const searchResultsTable = "search-results";
+const sharedClassTable = "shared-classes";
 
 const serverlessConfiguration: AWS = {
   service: 'file-search-backend',
@@ -13,7 +20,7 @@ const serverlessConfiguration: AWS = {
   plugins: ['serverless-esbuild', 'serverless-dotenv-plugin'],
   provider: {
     name: 'aws',
-    runtime: 'nodejs14.x',
+    runtime: 'nodejs16.x',
     apiGateway: {
       minimumCompressionSize: 1024,
       shouldStartNameWithService: true,
@@ -35,6 +42,14 @@ const serverlessConfiguration: AWS = {
         Resource: [
           'arn:aws:dynamodb:us-west-1:*:table/' + classTable + '-${opt:stage}',
           'arn:aws:dynamodb:us-west-1:*:table/' + classTable + '-${opt:stage}' + '/index/*',
+          'arn:aws:dynamodb:us-west-1:*:table/' + bookTable + '-${opt:stage}',
+          'arn:aws:dynamodb:us-west-1:*:table/' + bookTable + '-${opt:stage}' + '/index/*',
+          'arn:aws:dynamodb:us-west-1:*:table/' + promptTable + '-${opt:stage}',
+          'arn:aws:dynamodb:us-west-1:*:table/' + promptTable + '-${opt:stage}' + '/index/*',
+          'arn:aws:dynamodb:us-west-1:*:table/' + searchResultsTable + '-${opt:stage}',
+          'arn:aws:dynamodb:us-west-1:*:table/' + searchResultsTable + '-${opt:stage}' + '/index/*',
+          'arn:aws:dynamodb:us-west-1:*:table/' + sharedClassTable + '-${opt:stage}',
+          'arn:aws:dynamodb:us-west-1:*:table/' + sharedClassTable + '-${opt:stage}' + '/index/*',
           'arn:aws:dynamodb:us-west-1:*:table/' + userTable + '-${opt:stage}',
           'arn:aws:dynamodb:us-west-1:*:table/' + userTable + '-${opt:stage}' + '/index/*',
         ]
@@ -43,8 +58,11 @@ const serverlessConfiguration: AWS = {
   },
   // import the function via paths
   functions: { 
+    ...bookFunctions,
     ...classFunctions,
-    ...processFilesFunctions,
+    ...promptFunctions,
+    ...searchResultsFunctions,
+    ...sharedClassFunctions,
     ...stripeFunctions,
     ...userFunctions,
    },
@@ -115,6 +133,154 @@ const serverlessConfiguration: AWS = {
               KeySchema:[
                 {
                   AttributeName: "userId",
+                  KeyType: "HASH"
+                }
+              ],
+              Projection:{
+                ProjectionType: "ALL"
+              }
+            }
+          ]
+        }
+      },
+      BookTable: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          TableName: bookTable + '-${opt:stage}',
+          AttributeDefinitions: [
+            {
+              AttributeName: "id",
+              AttributeType: "S"
+            },
+            {
+              AttributeName: "classId",
+              AttributeType: "S"
+            }
+          ],
+          KeySchema: [
+            {
+              AttributeName: "id",
+              KeyType: "HASH"
+            }
+          ],
+          BillingMode: "PAY_PER_REQUEST",
+          GlobalSecondaryIndexes: [
+            {
+              IndexName: `${bookTable + '-${opt:stage}'}-classId-index`,
+              KeySchema:[
+                {
+                  AttributeName: "classId",
+                  KeyType: "HASH"
+                }
+              ],
+              Projection:{
+                ProjectionType: "ALL"
+              }
+            }
+          ]
+        }
+      },
+      PromptTable: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          TableName: promptTable + '-${opt:stage}',
+          AttributeDefinitions: [
+            {
+              AttributeName: "id",
+              AttributeType: "S"
+            },
+            {
+              AttributeName: "classId",
+              AttributeType: "S"
+            }
+          ],
+          KeySchema: [
+            {
+              AttributeName: "id",
+              KeyType: "HASH"
+            }
+          ],
+          BillingMode: "PAY_PER_REQUEST",
+          GlobalSecondaryIndexes: [
+            {
+              IndexName: `${promptTable + '-${opt:stage}'}-classId-index`,
+              KeySchema:[
+                {
+                  AttributeName: "classId",
+                  KeyType: "HASH"
+                }
+              ],
+              Projection:{
+                ProjectionType: "ALL"
+              }
+            }
+          ]
+        }
+      },
+      SearchResultsTable: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          TableName: searchResultsTable + '-${opt:stage}',
+          AttributeDefinitions: [
+            {
+              AttributeName: "id",
+              AttributeType: "S"
+            },
+            {
+              AttributeName: "promptId",
+              AttributeType: "S"
+            }
+          ],
+          KeySchema: [
+            {
+              AttributeName: "id",
+              KeyType: "HASH"
+            }
+          ],
+          BillingMode: "PAY_PER_REQUEST",
+          GlobalSecondaryIndexes: [
+            {
+              IndexName: `${searchResultsTable + '-${opt:stage}'}-promptId-index`,
+              KeySchema:[
+                {
+                  AttributeName: "promptId",
+                  KeyType: "HASH"
+                }
+              ],
+              Projection:{
+                ProjectionType: "ALL"
+              }
+            }
+          ]
+        }
+      },
+      SharedClassesTable: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          TableName: sharedClassTable + '-${opt:stage}',
+          AttributeDefinitions: [
+            {
+              AttributeName: "id",
+              AttributeType: "S"
+            },
+            {
+              AttributeName: "classId",
+              AttributeType: "S"
+            }
+          ],
+          KeySchema: [
+            {
+              AttributeName: "id",
+              KeyType: "HASH"
+            }
+          ],
+          BillingMode: "PAY_PER_REQUEST",
+          GlobalSecondaryIndexes: [
+            {
+              IndexName: `${sharedClassTable + '-${opt:stage}'}-classId-index`,
+              KeySchema:[
+                {
+                  AttributeName: "classId",
                   KeyType: "HASH"
                 }
               ],

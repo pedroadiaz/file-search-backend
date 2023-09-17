@@ -25,7 +25,7 @@ export const classFunctions = {
              {
                 http: {
                     method: 'get',
-                    path: 'class/:id',
+                    path: 'class/{id}',
                     cors: {
                       origin: "*",
                       headers: [
@@ -45,7 +45,7 @@ export const classFunctions = {
              {
                 http: {
                     method: 'get',
-                    path: 'class/user/:userId',
+                    path: 'class/user/{userId}',
                     cors: {
                       origin: "*",
                       headers: [
@@ -65,7 +65,7 @@ export const classFunctions = {
              {
                 http: {
                     method: 'delete',
-                    path: 'class/:id',
+                    path: 'class/{id}',
                     cors: {
                       origin: "*",
                       headers: [
